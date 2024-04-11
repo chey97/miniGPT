@@ -34,3 +34,45 @@ def get_data_and_vocab():
     
     # Return all the necessary data and mappings
     return training_data, data_words, target_words, vocabulary_words, word_to_ix, ix_to_word
+
+# Function to convert a batch of sequences of words to a tensor of indices
+def words_to_tensor(seq_batch, device=None):
+    index_batch = []
+    
+    # Loop over sequences in the batch
+    for seq in seq_batch:
+        word_list = seq.lower().split(" ")
+        indices = [word_to_ix[word] for word in word_list if word in word_to_ix]
+        t = torch.tensor(indices)
+        if device is not None:
+            t = t.to(device)  # Transfer tensor to the specified device
+        index_batch.append(t)
+    
+    # Pad tensors to have the same length
+    return pad_tensors(index_batch)
+
+# Function to pad a list of tensors to the same length
+def pad_tensors(list_of_tensors):
+    tensor_count = len(list_of_tensors) if not torch.is_tensor(list_of_tensors) else list_of_tensors.shape[0]
+    max_dim = max(t.shape[0] for t in list_of_tensors)  # Find the maximum length
+    res = []
+    for t in list_of_tensors:
+        # Create a zero tensor of the desired shape
+        res_t = torch.zeros(max_dim, *t.shape[1:]).type(t.dtype).to(t.device)
+        res_t[:t.shape[0]] = t  # Copy the original tensor into the padded tensor
+        res.append(res_t)
+    
+    # Concatenate tensors along a new dimension
+    res = torch.cat(res)
+    firstDim = len(list_of_tensors)
+    secondDim = max_dim
+    
+    # Reshape the result to have the new dimension first
+    return res.reshape(firstDim, secondDim, *res.shape[1:])
+
+# Main function to call the demonstration function
+if __name__ == "__main__":
+    # Get training data and vocabulary
+    training_data, data_words, target_words, vocabulary_words, word_to_ix, ix_to_word = get_data_and_vocab()
+    # Run the example training and inference function
+    # example_training_and_inference()
