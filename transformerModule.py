@@ -53,3 +53,4 @@ class Transformer(nn.Module):
     def get_angles(self, pos, i, embed_size):
         # Compute angle rate for each position and dimension
         angle_rates = 1 / torch.pow(10000, (2 * (i//2)) / embed_size)
+        return pos * angle_rates
