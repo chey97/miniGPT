@@ -3,7 +3,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import pprint
-from selfAttentionModule import SelfAttention
 from transformerBlock import TransformerBlock
 
 # Define Transformer module
