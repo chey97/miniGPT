@@ -8,24 +8,28 @@ import time
 import pandas as pd
 from transformerModule import Transformer
 
+def get_data_from_csv(csv_file_path):
+    # Read the CSV file
+    df = pd.read_csv(csv_file_path)
+
+    # Extract input and target phrases from the DataFrame
+    data_words = df['input_phrase'].tolist()
+    target_words = df['target_phrase'].tolist()
+    
+    # Remove '\u200b' character from input and target phrases
+    data_words = [phrase.replace('\u200b', '') for phrase in data_words]
+    target_words = [phrase.replace('\u200b', '') for phrase in target_words]
+    
+    # Create training_data dictionary
+    training_data = {data_words[i]: target_words[i] for i in range(len(data_words))}
+
+    return training_data,data_words, target_words
 
 # Function to obtain training data, vocab and mapping from word to index and vice versa
 def get_data_and_vocab():
     
-    # Define training data
-    training_data = {
-        "how are you": "i am fine <end>",
-        "who is chey": "a nice person <end>",
-        "who is nice": "john <end>",
-        "where is chey": "at home <end>",
-        "how is chey": "i dont know <end>",
-        "who are you": "mini gpt model <end>",
-        "how are you": "i am doing well thank you <end>"
-    }
-    
-    # Extract input and target phrases
-    data_words = [k for k, _ in training_data.items()]
-    target_words = [v for _, v in training_data.items()]
+    # Get training data from CSV file
+    training_data, data_words, target_words = get_data_from_csv("test_data.csv")
     
     # Splitting input phrases into words and converting to lowercase
     data_words_split = [x.split(" ") for x in data_words]
@@ -40,8 +44,8 @@ def get_data_and_vocab():
 
     
     # Ensure <end> token is at the end of vocabulary list, and there's a blank at the beginning
-    vocabulary_words.remove("<end>")
-    vocabulary_words.append("<end>")
+    vocabulary_words.remove(".")
+    vocabulary_words.append(".")
     vocabulary_words.insert(0, "") 
     
     # Create mappings from word to index and index to word
@@ -75,7 +79,7 @@ def tensor_to_words(tensor):
         words = []
         for ix in indices:
             words.append(ix_to_word[ix].lower())  # Convert index to word
-            if ix == word_to_ix["<end>"]:
+            if ix == word_to_ix["."]:
                 break  # Stop when <end> token is encountered
         res.append(" ".join(words))
     return res
@@ -163,7 +167,7 @@ def infer_recursive(model, input_vectors, max_output_token_count=10):
                 predicted_index = output[0, :].argmax().item()  # Get index of predicted token
                 predicted_sequence.append(predicted_index)  # Append predicted index to sequence
                 # Stop when <end> token is predicted or the maximum output length is reached
-                if predicted_index == word_to_ix['<end>'] or wc > max_output_token_count:
+                if predicted_index == word_to_ix['.'] or wc > max_output_token_count:
                     break
                 # Append predicted token to input and increment word count
                 input_vector = torch.cat([input_vector, torch.tensor([[predicted_index]])], dim=1)
