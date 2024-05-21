@@ -3,6 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import pprint
+import selfAttentionModule, transformerModule, transformerBlock
 
 
 # Function to obtain training data, vocab and mapping from word to index and vice versa
@@ -108,7 +109,6 @@ def pad_tensors(list_of_tensors):
 
     # Reshape the result to have the new dimension first
     return res.reshape(firstDim, secondDim, *res.shape[1:])
-
 
 
 # Main function to call the demonstration function
