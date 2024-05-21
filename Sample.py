@@ -4,25 +4,31 @@ import torch.nn as nn
 import torch.optim as optim
 import pprint
 import os
-from selfAttentionModule import SelfAttention
-from transformerBlock import TransformerBlock
+import pandas as pd
 from transformerModule import Transformer
+
+def get_data_from_csv(csv_file_path):
+    # Read the CSV file
+    df = pd.read_csv(csv_file_path)
+
+    # Extract input and target phrases from the DataFrame
+    data_words = df['input_phrase'].tolist()
+    target_words = df['target_phrase'].tolist()
+    
+    # Create training_data dictionary
+    training_data = {data_words[i]: target_words[i] for i in range(len(data_words))}
+
+    return training_data,data_words, target_words
 
 # Function to obtain training data, vocab and mapping from word to index and vice versa
 def get_data_and_vocab():
-    # Define training data
-    training_data = {
-        "how are you": "i am fine <end>",
-        "who is john": "a nice person <end>",
-        "who is nice": "john <end>",
-        "where is john": "at home <end>",
-        "how is john": "i dont know <end>",
-        "who are you": "mini gpt model <end>"
-    }
     
-    # Extract input and target phrases
-    data_words = [k for k, _ in training_data.items()]
-    target_words = [v for _, v in training_data.items()]
+    # Get training data from CSV file
+    training_data, data_words, target_words = get_data_from_csv("test_data.csv")
+    
+    # # Extract input and target phrases
+    # data_words = [k for k, _ in training_data.items()]
+    # target_words = [v for _, v in training_data.items()]
     
     # Build vocabulary from training data
     vocabulary_words = list(set([element.lower() for nestedlist in [x.split(" ") for x in data_words] for element in nestedlist] + [element.lower() for nestedlist in [x.split(" ") for x in target_words] for element in nestedlist]))

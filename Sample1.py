@@ -186,9 +186,19 @@ def example_training_and_inference():
     embed_size = 512
     num_layers = 4
     heads = 3
+    device = torch.device("cpu")
+    
+     # Load the saved model (if it exists)
+    model_path = "trainedModels/trained_model15.pth" 
+    try:
+        model = Transformer(vocab_size, embed_size, num_layers, heads).to(device)
+        model.load_state_dict(torch.load(model_path))
+        print("Loaded saved model from:", model_path)
+    except FileNotFoundError:
+        print("No saved model found. Training from scratch.")
+        model = Transformer(vocab_size, embed_size, num_layers, heads).to(device)
 
     # Create model, optimizer, and loss function
-    device = torch.device("cpu")
     model = Transformer(vocab_size, embed_size, num_layers, heads).to(device)
     optimizer = optim.Adam(model.parameters(), lr=0.00001)
     criterion = nn.CrossEntropyLoss()
